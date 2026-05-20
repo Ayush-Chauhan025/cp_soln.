@@ -2,60 +2,54 @@ import static java.lang.Math.*;
 import java.util.*;
 import java.io.*;
 
-public class Main {
+public class BZhilyAndMexAndMax {
     static final int mod = (int) 1e9 + 7;
-    public static ArrayList<Integer>[] tree;
-    public static int[] dp;
 
     public static void main(String[] args) throws Exception {
         FastScanner fs = new FastScanner(System.in);
 
-        int arr[] = { 0 };
-
-        int n = arr.length;
-        HashMap<Integer, ArrayList<Integer>> map = new HashMap<>();
-        ArrayList<ArrayList<Integer>> list = new ArrayList<>();
-        for (int i = 0; i < n; i++) {
-            list.add(new ArrayList<>());
-        }
-        map.put(arr[0], new ArrayList<>());
-        map.get(arr[0]).add(0);
-        for (int i = 1; i < n; i++) {
-            int val = arr[i];
-            list.get(i).add(i - 1);
-            list.get(i - 1).add(i);
-            if (map.containsKey(val)) {
-                for (int idx : map.get(val)) {
-                    list.get(i).add(idx);
-                    list.get(idx).add(i);
-                }
-            } else {
-                map.put(val, new ArrayList<>());
+        int t = fs.nextInt();
+        while (t-- > 0) {
+            int n = fs.nextInt();
+            long a[] = new long[n];
+            TreeSet<Long> set = new TreeSet<>();
+            for (int i = 0; i < n; i++) {
+                a[i] = fs.nextInt();
             }
-            map.get(val).add(i);
-        }
-        int inf = (int) (1e9);
-        int cst[] = new int[n];
-        Arrays.fill(cst, inf);
-        cst[0] = 0;
-        PriorityQueue<int[]> pq = new PriorityQueue<>((x, y) -> Integer.compare(x[1], y[1]));
-
-        pq.offer(new int[] { 0, 0 });
-        while (!pq.isEmpty()) {
-            int a[] = pq.poll();
-            int cur = a[0];
-            // if(cur == n - 1) return cst[cur];
-
-            for (int idx : list.get(cur)) {
-                if (cst[cur] + 1 < cst[idx]) {
-                    cst[idx] = cst[cur];
-                    pq.offer(new int[] { idx, cst[idx] });
-                }
+            Arrays.sort(a);
+            for (int i = 0; i < n - 1; i++) {
+                set.add(a[i]);
             }
-        }
+            long b[] = new long[n];
+            b[0] = a[n - 1];
+            int idx = 1;
+            for (long val : set) {
+                b[idx] = val;
+                idx++;
+            }
+            for (; idx < n; idx++) {
+                b[idx] = -1;
+            }
+            long ans = 0;
+            long mex = 0;
+            long max = 0;
+            set = new TreeSet<>();
+            for (int i = 0; i < n; i++) {
+                max = Math.max(max, b[i]);
+                set.add(b[i]);
+                while (set.contains(mex))
+                    mex++;
 
-        // return n - 1;
+                ans += max + mex;
+            }
+            System.out.println(ans);
+        }
     }
+
+    /*
+    
+    
+    */
 
     // FastScanner
     static class FastScanner {

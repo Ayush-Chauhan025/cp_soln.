@@ -4,108 +4,91 @@ import java.io.*;
 
 public class DSanaeCrossAndColor {
     static final int mod = (int) 1e9 + 7;
+    public static int inf = (int) (1e8);
+    public static int sz = (int) 2e6 + 5;
+    public static int min_y[] = new int[sz];
+    public static int max_y[] = new int[sz];
+    public static int pref_min[] = new int[sz];
+    public static int pref_max[] = new int[sz];
+    public static int suf_min[] = new int[sz];
+    public static int suf_max[] = new int[sz];
+    public static int y_pts[] = new int[sz];
 
     public static void main(String[] args) throws Exception {
         FastScanner fs = new FastScanner(System.in);
 
+        Arrays.fill(min_y, inf);
+        Arrays.fill(pref_min, inf);
+        Arrays.fill(suf_min, inf);
+
         int t = fs.nextInt();
         while (t-- > 0) {
             int n = fs.nextInt();
-            int points[][] = new int[n][2];
+            int mn_x = inf;
+            int mx_x = -1;
+
+            int mx_y = -1;
             for (int i = 0; i < n; i++) {
-                points[i][0] = fs.nextInt();
-                points[i][1] = fs.nextInt();
+                int x = fs.nextInt();
+                int y = fs.nextInt();
+
+                mn_x = min(mn_x, x);
+                mx_x = max(mx_x, x);
+                mx_y = max(mx_y, y);
+
+                min_y[x] = min(min_y[x], y);
+                max_y[x] = max(max_y[x], y);
+
+                if (y_pts[y] == 0)
+                    y_pts[y]++;
             }
 
-            Arrays.sort(points, (f, s) -> {
-                if (f[0] == s[0])
-                    return f[1] - s[1];
-                else
-                    return f[0] - s[0];
-            });
+            pref_min[mn_x] = min_y[mn_x];
+            suf_min[mx_x] = min_y[mx_x];
+            pref_max[mn_x] = max_y[mn_x];
+            suf_max[mx_x] = max_y[mx_x];
 
-            ArrayList<Integer> x_coords = new ArrayList<>();
-            ArrayList<ArrayList<Integer>> x_pts = new ArrayList<>();
-            HashSet<Integer> y_coords = new HashSet<>();
-            for (int i = 0; i < n; i++) {
-                int x = points[i][0];
-                int y = points[i][1];
-                if (x_coords.size() == 0 || x_coords.get(x_coords.size() - 1) != x) {
-                    x_coords.add(x);
-                    x_pts.add(new ArrayList<>());
-                }
-                x_pts.get(x_coords.size() - 1).add(y);
-                y_coords.add(y);
+            for (int i = mn_x + 1; i <= mx_x; i++) {
+                pref_min[i] = min(min_y[i], pref_min[i - 1]);
+                pref_max[i] = max(max_y[i], pref_max[i - 1]);
             }
-            int x_len = x_coords.size();
-            ArrayList<Integer> y_pts = new ArrayList<>();
-            for (int y : y_coords) {
-                y_pts.add(y);
+
+            for (int i = mx_x - 1; i >= mn_x; i--) {
+                suf_min[i] = min(min_y[i], suf_min[i + 1]);
+                suf_max[i] = max(max_y[i], suf_max[i + 1]);
             }
-            Collections.sort(y_pts);
 
-            TreeMap<Integer, Integer> upper = new TreeMap<>();
-            int btm_min = 100000000;
-            int btm_max = 0;
-
-            for (int i = 0; i < n; i++) {
-                int y = points[i][1];
-
-                upper.put(y, upper.getOrDefault(y, 0) + 1);
+            for (int i = 1; i <= mx_y; i++) {
+                y_pts[i] += y_pts[i - 1];
             }
+
             long ans = 0;
-            int top_min = upper.firstKey();
-            int top_max = upper.lastKey();
-
-            for (int i = x_len - 1; i >= 0; i--) {
-                // move all y's to the bottom half
-                for (int y : x_pts.get(i)) {
-                    if (upper.get(y) == 1)
-                        upper.remove(y);
-                    else
-                        upper.put(y, upper.get(y) - 1);
-
-                    btm_max = Math.max(btm_max, y);
-                    btm_min = Math.min(btm_min, y);
-                }
-
-                if (upper.isEmpty())
+            for (int i = mn_x; i <= mx_x; i++) {
+                if (min_y[i] == inf)
                     continue;
-                top_min = upper.firstKey();
-                top_max = upper.lastKey();
-
-                int l = max(top_min, btm_min);
-                int r = min(top_max, btm_max);
+                int l = Math.max(pref_min[i], suf_min[i + 1]);
+                int r = Math.min(pref_max[i], suf_max[i + 1]);
 
                 if (l < r) {
-                    int s = bs(y_pts, r);
-                    int f = bs(y_pts, l);
-                    if (f == -1 || s == -1)
-                        continue;
-                    ans += s - f;
+                    ans += y_pts[r - 1] - y_pts[l - 1];
                 }
             }
 
             System.out.println(ans);
-        }
-    }
 
-    public static int bs(ArrayList<Integer> bs, int key) {
-        int l = 0;
-        int r = bs.size() - 1;
-        int idx = 0;
-        while (l <= r) {
-            int mid = l + (r - l) / 2;
-            int val = bs.get(mid);
-            if (key == val)
-                return mid;
-            else if (key < val)
-                r = mid - 1;
-            else
-                l = mid + 1;
-        }
+            for (int i = mn_x; i <= mx_x; i++) {
+                min_y[i] = inf;
+                max_y[i] = 0;
+                pref_min[i] = inf;
+                suf_min[i] = inf;
+                pref_max[i] = 0;
+                suf_max[i] = 0;
+            }
 
-        return idx;
+            for (int i = 0; i <= mx_y; i++) {
+                y_pts[i] = 0;
+            }
+        }
     }
 
     /*
