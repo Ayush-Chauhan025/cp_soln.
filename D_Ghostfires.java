@@ -11,13 +11,138 @@ public class D_Ghostfires {
         int t = fs.nextInt();
         while (t-- > 0) {
             char ch[] = { 'R', 'G', 'B' };
-            ArrayList<int[]> list = new ArrayList<>();
+            int ct[] = new int[3];
             for (int i = 0; i < 3; i++) {
-                int val = fs.nextInt();
-                list.add(new int[] { val, i });
+                ct[i] = fs.nextInt();
             }
-            Collections.sort(list, (x, y) -> y[0] - x[0]);
+            int f_s = 0;
+            int f_t = 0;
+            int t_s = 0;
+            while (ct[0] != 0 || ct[1] != 0 || ct[2] != 0) {
+                if (ct[0] != 0 && ct[1] != 0 && ct[0] >= ct[2] && ct[1] >= ct[2]) {
+                    f_s++;
+                    ct[0]--;
+                    ct[1]--;
+                } else if (ct[0] != 0 && ct[2] != 0 && ct[0] >= ct[1] && ct[2] >= ct[1]) {
+                    f_t++;
+                    ct[0]--;
+                    ct[2]--;
+                } else if (ct[2] != 0 && ct[1] != 0 && ct[1] >= ct[0] && ct[2] >= ct[0]) {
+                    t_s++;
+                    ct[1]--;
+                    ct[2]--;
+                } else {
+                    break;
+                }
+            }
 
+            StringBuilder sb = new StringBuilder();
+            if (f_s == 0 && f_t == 0 && t_s == 0) {
+                if (ct[0] != 0)
+                    sb.append(ch[0]);
+                else if (ct[1] != 0)
+                    sb.append(ch[1]);
+                else if (ct[2] != 0)
+                    sb.append(ch[2]);
+            } else if (f_s == 0 && f_t == 0) {
+                if (ct[1] != 0)
+                    sb.append(ch[1]);
+                for (int i = 0; i < t_s; i++) {
+                    sb.append("BG");
+                }
+                if (ct[2] != 0)
+                    sb.append(ch[2]);
+                else if (ct[0] != 0)
+                    sb.append(ch[0]);
+            } else if (f_s == 0 && t_s == 0) {
+                if (ct[2] != 0)
+                    sb.append(ch[2]);
+                for (int i = 0; i < f_t; i++) {
+                    sb.append("RB");
+                }
+                if (ct[0] != 0)
+                    sb.append(ch[0]);
+                else if (ct[1] != 0)
+                    sb.append(ch[1]);
+            } else if (f_t == 0 && t_s == 0) {
+                if (ct[1] != 0)
+                    sb.append(ch[1]);
+                for (int i = 0; i < f_s; i++) {
+                    sb.append("RG");
+                }
+                if (ct[0] != 0)
+                    sb.append(ch[0]);
+                else if (ct[2] != 0)
+                    sb.append(ch[2]);
+            } else if (f_s == 0) {
+                if (ct[0] != 0)
+                    sb.append(ch[0]);
+                if (ct[1] != 0)
+                    sb.append(ch[1]);
+                for (int i = 0; i < t_s; i++) {
+                    sb.append("BG");
+                }
+                for (int i = 0; i < f_t; i++) {
+                    sb.append("BR");
+                }
+                if (ct[2] != 0)
+                    sb.append(ch[2]);
+            } else if (t_s == 0) {
+                if (ct[2] != 0)
+                    sb.append(ch[2]);
+                if (ct[1] != 0)
+                    sb.append(ch[1]);
+                for (int i = 0; i < f_s; i++) {
+                    sb.append("RG");
+                }
+                for (int i = 0; i < f_t; i++) {
+                    sb.append("RB");
+                }
+                if (ct[0] != 0)
+                    sb.append(ch[0]);
+            } else if (f_t == 0) {
+                if (ct[0] != 0)
+                    sb.append(ch[0]);
+                if (ct[2] != 0)
+                    sb.append(ch[2]);
+                for (int i = 0; i < t_s; i++) {
+                    sb.append("GB");
+                }
+                for (int i = 0; i < f_s; i++) {
+                    sb.append("GR");
+                }
+                if (ct[1] != 0)
+                    sb.append(ch[1]);
+            } else {
+                if (ct[0] == 0) {
+                    if (ct[1] != 0)
+                        sb.append(ch[1]);
+                    for (int i = 0; i < f_s; i++) {
+                        sb.append("RG");
+                    }
+                    for (int i = 0; i < t_s; i++) {
+                        sb.append("BG");
+                    }
+                    for (int i = 0; i < f_t; i++) {
+                        sb.append("BR");
+                    }
+                    if (ct[2] != 0)
+                        sb.append(ch[2]);
+                } else {
+                    sb.append(ch[0]);
+                    for (int i = 0; i < f_s; i++) {
+                        sb.append("GR");
+                    }
+                    for (int i = 0; i < f_t; i++) {
+                        sb.append("BR");
+                    }
+                    for (int i = 0; i < t_s; i++) {
+                        sb.append("BG");
+                    }
+                }
+            }
+
+            System.out.println(sb.toString());
         }
     }
 
@@ -27,6 +152,12 @@ public class D_Ghostfires {
      * 
      * try to make every second char equal -> it will increase length and reduces
      * matching
+     * 
+     * so our goal is the find the best possible way to divide them into pair &
+     * distribute and after formation there is only one color whose element will be
+     * left
+     * 
+     * 
      */
 
     // FastScanner
