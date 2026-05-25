@@ -2,25 +2,8 @@ import static java.lang.Math.*;
 import java.util.*;
 import java.io.*;
 
-public class DZhilyAndBarknights {
-    static final int mod = (int) 998244353;
-
-    static class Fraction implements Comparable<Fraction> {
-        long num, den;
-
-        public Fraction(long num, long den) {
-            this.num = num;
-            this.den = den;
-        }
-
-        @Override
-        public int compareTo(Fraction other) {
-            long lhs = this.num * other.den;
-            long rhs = this.den * other.num;
-
-            return Long.compare(lhs, rhs);
-        }
-    }
+public class C2WeBeFlippingHardVersion {
+    static final int mod = (int) 1e9 + 7;
 
     public static void main(String[] args) throws Exception {
         FastScanner fs = new FastScanner(System.in);
@@ -29,89 +12,92 @@ public class DZhilyAndBarknights {
         while (t-- > 0) {
             int n = fs.nextInt();
             long a[] = new long[n];
-            long b[] = new long[n];
-
             for (int i = 0; i < n; i++) {
                 a[i] = fs.nextLong();
             }
-
-            for (int i = 0; i < n; i++) {
-                b[i] = fs.nextLong();
+            long suf[] = new long[n + 1];
+            for (int i = n - 1; i >= 0; i--) {
+                suf[i] = a[i] + suf[i + 1];
             }
-
-            Fraction f[] = new Fraction[n * (n - 1)];
-            int idx = 0;
+            ArrayList<Integer> list = new ArrayList<>();
+            int max = -1;
+            long val = suf[0];
+            long sum = 0;
             for (int i = 0; i < n; i++) {
-                for (int j = 0; j < n; j++) {
-                    if (i == j)
-                        continue;
-                    f[idx++] = new Fraction(b[i], b[j]);
-                }
-            }
-            Arrays.sort(f);
-
-            long ans = 0;
-            for (int i = 0; i < n; i++) {
-                for (int j = i + 1; j < n; j++) {
-                    Fraction val = new Fraction(a[j], a[i]);
-
-                    long comb = bs(f, val);
-                    ans += comb;
+                if (a[i] > 0) {
+                    sum += a[i];
+                    long tot = sum - 2 * a[i] + suf[i + 1];
+                    if (tot > val) {
+                        val = tot;
+                        max = i;
+                    }
+                } else {
+                    sum -= a[i];
                 }
             }
 
-            ans %= mod;
-
-            ans = (ans * modInv(n)) % mod;
-
-            System.out.println(ans);
-        }
-    }
-
-    public static long modInv(int n) {
-        long val = n * (n - 1);
-        long mod = 998244353;
-
-        return power(val, mod - 2);
-    }
-
-    public static long power(long a, long b) {
-        long res = 1;
-
-        while (b > 0) {
-            if ((b & 1) == 1)
-                res = (res * a) % mod;
-
-            a = (a * a) % mod;
-            b >>= 1;
-        }
-
-        return res;
-    }
-
-    public static long bs(Fraction f[], Fraction val) {
-        int sz = f.length;
-        int ans = 0;
-        int l = 0;
-        int r = sz - 1;
-
-        while (l <= r) {
-            int mid = l + (r - l) / 2;
-            if (f[mid].compareTo(val) > 0) {
-                ans = sz - mid;
-                r = mid - 1;
-            } else {
-                l = mid + 1;
+            if (max > 0) {
+                long prev = 0;
+                for (int i = 0; i < max; i++) {
+                    if (a[i] > 0) {
+                        if (prev < 0)
+                            list.add(-(i));
+                        prev = a[i];
+                    } else {
+                        if (prev > 0)
+                            list.add(i);
+                        prev = a[i];
+                    }
+                }
+                if (prev < 0)
+                    list.add(-(max));
+                else
+                    list.add(max);
             }
-        }
 
-        return ans;
+            int sz = list.size();
+            int neg = -1;
+            ArrayList<Integer> ans = new ArrayList<>();
+            for (int i = 0; i < sz; i++) {
+                int vl = list.get(i);
+                int idx = abs(vl) - 1;
+
+                if (vl < 0) {
+                    neg = idx;
+                } else {
+                    if (neg > -1) {
+                        ans.add(idx);
+                        ans.add(neg);
+                    } else {
+                        ans.add(idx);
+                    }
+                    neg = -1;
+                }
+            }
+
+            if (max != -1)
+                ans.add(max);
+
+            int len = ans.size();
+            System.out.println(len);
+            for (int i = 0; i < len; i++) {
+                System.out.print((ans.get(i) + 1) + " ");
+            }
+            System.out.println();
+        }
     }
 
     /*
-    
-    
-    */
+     * only positive index can be choosen for operation
+     * sign of prefix changes
+     * 
+     * for every block of -ve -ve +ve we have a choise either keep as it is or
+     * change it
+     * 
+     * -ve -ve +ve -ve -ve +ve
+     * +ve +ve -ve +ve +ve -ve
+     * +ve +ve -ve -ve +ve -ve
+     */
 
     // FastScanner
     static class FastScanner {

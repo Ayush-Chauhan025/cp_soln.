@@ -2,25 +2,9 @@ import static java.lang.Math.*;
 import java.util.*;
 import java.io.*;
 
-public class DZhilyAndBarknights {
-    static final int mod = (int) 998244353;
-
-    static class Fraction implements Comparable<Fraction> {
-        long num, den;
-
-        public Fraction(long num, long den) {
-            this.num = num;
-            this.den = den;
-        }
-
-        @Override
-        public int compareTo(Fraction other) {
-            long lhs = this.num * other.den;
-            long rhs = this.den * other.num;
-
-            return Long.compare(lhs, rhs);
-        }
-    }
+public class DMeWhenMedianProblem {
+    static final int mod = (int) 1e9 + 7;
+    public static long inf = (long) 1e15;
 
     public static void main(String[] args) throws Exception {
         FastScanner fs = new FastScanner(System.in);
@@ -28,90 +12,67 @@ public class DZhilyAndBarknights {
         int t = fs.nextInt();
         while (t-- > 0) {
             int n = fs.nextInt();
-            long a[] = new long[n];
-            long b[] = new long[n];
-
+            int a[] = new int[n];
+            int b[] = new int[n];
+            ArrayList<Integer> list = new ArrayList<>();
             for (int i = 0; i < n; i++) {
-                a[i] = fs.nextLong();
+                a[i] = fs.nextInt();
+                list.add(a[i]);
+            }
+            for (int i = 0; i < n; i++) {
+                b[i] = fs.nextInt();
+                list.add(b[i]);
             }
 
-            for (int i = 0; i < n; i++) {
-                b[i] = fs.nextLong();
-            }
+            Collections.sort(list);
 
-            Fraction f[] = new Fraction[n * (n - 1)];
-            int idx = 0;
-            for (int i = 0; i < n; i++) {
-                for (int j = 0; j < n; j++) {
-                    if (i == j)
-                        continue;
-                    f[idx++] = new Fraction(b[i], b[j]);
+            int s = 0;
+            int e = 2 * n - 1;
+            int ans = 0;
+            while (s <= e) {
+                int mid = s + (e - s) / 2;
+
+                boolean ch = valid(a, b, list.get(mid));
+                if (ch) {
+                    ans = list.get(mid);
+                    s = mid + 1;
+                } else {
+                    e = mid - 1;
                 }
             }
-            Arrays.sort(f);
-
-            long ans = 0;
-            for (int i = 0; i < n; i++) {
-                for (int j = i + 1; j < n; j++) {
-                    Fraction val = new Fraction(a[j], a[i]);
-
-                    long comb = bs(f, val);
-                    ans += comb;
-                }
-            }
-
-            ans %= mod;
-
-            ans = (ans * modInv(n)) % mod;
 
             System.out.println(ans);
         }
     }
 
-    public static long modInv(int n) {
-        long val = n * (n - 1);
-        long mod = 998244353;
-
-        return power(val, mod - 2);
-    }
-
-    public static long power(long a, long b) {
-        long res = 1;
-
-        while (b > 0) {
-            if ((b & 1) == 1)
-                res = (res * a) % mod;
-
-            a = (a * a) % mod;
-            b >>= 1;
-        }
-
-        return res;
-    }
-
-    public static long bs(Fraction f[], Fraction val) {
-        int sz = f.length;
-        int ans = 0;
-        int l = 0;
-        int r = sz - 1;
-
-        while (l <= r) {
-            int mid = l + (r - l) / 2;
-            if (f[mid].compareTo(val) > 0) {
-                ans = sz - mid;
-                r = mid - 1;
+    public static boolean valid(int a[], int b[], int val) {
+        int n = a.length;
+        int twos = 0;
+        int lst = -1;
+        int ones = 0;
+        for (int i = 0; i < n; i++) {
+            int dig = (a[i] >= val ? 1 : 0) + (b[i] >= val ? 1 : 0);
+            if (dig == 1)
+                continue;
+            if (dig == 0) {
+                if (lst == -1) {
+                    ones++;
+                }
+                lst = 0;
             } else {
-                l = mid + 1;
+                twos++;
+                lst = -1;
             }
         }
 
-        return ans;
+        if (twos > ones)
+            return true;
+        return false;
     }
 
     /*
-    
-    
-    */
+     * 
+     */
 
     // FastScanner
     static class FastScanner {
